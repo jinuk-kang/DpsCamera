@@ -12,6 +12,14 @@ namespace DpsCamera {
     public partial class InquireForm : Form {
         public InquireForm() {
             InitializeComponent();
+
+            this.inqureButton.Click += inqureButtonClicked;
+            this.emtpyMsgLabel.Hide();
+            this.resultListView.Hide();
+        }
+
+        public void inqureButtonClicked(object sender, EventArgs e) {
+            this.emtpyMsgLabel.Show();
         }
     }
 }
