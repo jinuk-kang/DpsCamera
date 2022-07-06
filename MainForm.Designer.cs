@@ -34,13 +34,16 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
+            this.workCountLabel = new System.Windows.Forms.Label();
             this.startButton = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.productImage = new System.Windows.Forms.PictureBox();
             this.connectCameraButton = new System.Windows.Forms.Button();
             this.disconnectCameraButton = new System.Windows.Forms.Button();
             this.endButton = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.startGrabButton = new System.Windows.Forms.Button();
+            this.stopGrabButton = new System.Windows.Forms.Button();
+            this.saveJpgButton = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.productImage)).BeginInit();
             this.SuspendLayout();
             // 
             // inquireButton
@@ -59,7 +62,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label1.Location = new System.Drawing.Point(722, 290);
+            this.label1.Location = new System.Drawing.Point(735, 414);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(56, 31);
             this.label1.TabIndex = 1;
@@ -70,7 +73,7 @@
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.SystemColors.Info;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label2.Location = new System.Drawing.Point(871, 275);
+            this.label2.Location = new System.Drawing.Point(884, 399);
             this.label2.Name = "label2";
             this.label2.Padding = new System.Windows.Forms.Padding(5);
             this.label2.Size = new System.Drawing.Size(191, 46);
@@ -81,7 +84,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label3.Location = new System.Drawing.Point(722, 379);
+            this.label3.Location = new System.Drawing.Point(735, 478);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 31);
             this.label3.TabIndex = 3;
@@ -92,7 +95,7 @@
             this.label4.AutoSize = true;
             this.label4.BackColor = System.Drawing.SystemColors.Info;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label4.Location = new System.Drawing.Point(871, 364);
+            this.label4.Location = new System.Drawing.Point(884, 463);
             this.label4.Name = "label4";
             this.label4.Padding = new System.Windows.Forms.Padding(5);
             this.label4.Size = new System.Drawing.Size(277, 46);
@@ -103,23 +106,23 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label5.Location = new System.Drawing.Point(722, 477);
+            this.label5.Location = new System.Drawing.Point(735, 540);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(98, 31);
             this.label5.TabIndex = 5;
             this.label5.Text = "작업수량";
             // 
-            // label6
+            // workCountLabel
             // 
-            this.label6.AutoSize = true;
-            this.label6.BackColor = System.Drawing.SystemColors.Info;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.label6.Location = new System.Drawing.Point(871, 463);
-            this.label6.Name = "label6";
-            this.label6.Padding = new System.Windows.Forms.Padding(5);
-            this.label6.Size = new System.Drawing.Size(79, 46);
-            this.label6.TabIndex = 6;
-            this.label6.Text = "150";
+            this.workCountLabel.AutoSize = true;
+            this.workCountLabel.BackColor = System.Drawing.SystemColors.Info;
+            this.workCountLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.workCountLabel.Location = new System.Drawing.Point(884, 526);
+            this.workCountLabel.Name = "workCountLabel";
+            this.workCountLabel.Padding = new System.Windows.Forms.Padding(5);
+            this.workCountLabel.Size = new System.Drawing.Size(79, 46);
+            this.workCountLabel.TabIndex = 6;
+            this.workCountLabel.Text = "150";
             // 
             // startButton
             // 
@@ -133,19 +136,19 @@
             this.startButton.UseVisualStyleBackColor = true;
             this.startButton.Click += new System.EventHandler(this.startButtonClick);
             // 
-            // pictureBox1
+            // productImage
             // 
-            this.pictureBox1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.pictureBox1.Location = new System.Drawing.Point(131, 82);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(498, 506);
-            this.pictureBox1.TabIndex = 8;
-            this.pictureBox1.TabStop = false;
+            this.productImage.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.productImage.Location = new System.Drawing.Point(131, 82);
+            this.productImage.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.productImage.Name = "productImage";
+            this.productImage.Size = new System.Drawing.Size(498, 506);
+            this.productImage.TabIndex = 8;
+            this.productImage.TabStop = false;
             // 
             // connectCameraButton
             // 
-            this.connectCameraButton.Location = new System.Drawing.Point(727, 123);
+            this.connectCameraButton.Location = new System.Drawing.Point(727, 82);
             this.connectCameraButton.Name = "connectCameraButton";
             this.connectCameraButton.Size = new System.Drawing.Size(158, 76);
             this.connectCameraButton.TabIndex = 9;
@@ -155,7 +158,7 @@
             // 
             // disconnectCameraButton
             // 
-            this.disconnectCameraButton.Location = new System.Drawing.Point(935, 123);
+            this.disconnectCameraButton.Location = new System.Drawing.Point(935, 82);
             this.disconnectCameraButton.Name = "disconnectCameraButton";
             this.disconnectCameraButton.Size = new System.Drawing.Size(153, 76);
             this.disconnectCameraButton.TabIndex = 10;
@@ -173,17 +176,50 @@
             this.endButton.UseVisualStyleBackColor = true;
             this.endButton.Click += new System.EventHandler(this.endButtonClick);
             // 
+            // startGrabButton
+            // 
+            this.startGrabButton.Location = new System.Drawing.Point(727, 174);
+            this.startGrabButton.Name = "startGrabButton";
+            this.startGrabButton.Size = new System.Drawing.Size(158, 75);
+            this.startGrabButton.TabIndex = 12;
+            this.startGrabButton.Text = "녹화 시작";
+            this.startGrabButton.UseVisualStyleBackColor = true;
+            this.startGrabButton.Click += new System.EventHandler(this.startGrabButtonClick);
+            // 
+            // stopGrabButton
+            // 
+            this.stopGrabButton.Location = new System.Drawing.Point(935, 174);
+            this.stopGrabButton.Name = "stopGrabButton";
+            this.stopGrabButton.Size = new System.Drawing.Size(158, 75);
+            this.stopGrabButton.TabIndex = 13;
+            this.stopGrabButton.Text = "녹화 중지";
+            this.stopGrabButton.UseVisualStyleBackColor = true;
+            this.stopGrabButton.Click += new System.EventHandler(this.stopGrabButtonClick);
+            // 
+            // saveJpgButton
+            // 
+            this.saveJpgButton.Location = new System.Drawing.Point(727, 266);
+            this.saveJpgButton.Name = "saveJpgButton";
+            this.saveJpgButton.Size = new System.Drawing.Size(158, 75);
+            this.saveJpgButton.TabIndex = 14;
+            this.saveJpgButton.Text = "사진 저장";
+            this.saveJpgButton.UseVisualStyleBackColor = true;
+            this.saveJpgButton.Click += new System.EventHandler(this.saveJpgButtonClick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1416, 909);
+            this.Controls.Add(this.saveJpgButton);
+            this.Controls.Add(this.stopGrabButton);
+            this.Controls.Add(this.startGrabButton);
             this.Controls.Add(this.endButton);
             this.Controls.Add(this.disconnectCameraButton);
             this.Controls.Add(this.connectCameraButton);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.productImage);
             this.Controls.Add(this.startButton);
-            this.Controls.Add(this.label6);
+            this.Controls.Add(this.workCountLabel);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -195,7 +231,7 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.productImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -209,12 +245,15 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label workCountLabel;
         private System.Windows.Forms.Button startButton;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox productImage;
         private System.Windows.Forms.Button connectCameraButton;
         private System.Windows.Forms.Button disconnectCameraButton;
         private System.Windows.Forms.Button endButton;
+        private System.Windows.Forms.Button startGrabButton;
+        private System.Windows.Forms.Button stopGrabButton;
+        private System.Windows.Forms.Button saveJpgButton;
     }
 }
 
