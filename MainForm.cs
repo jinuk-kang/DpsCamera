@@ -9,9 +9,37 @@ using System.Threading;
 using System.Windows.Forms;
 using MvCamCtrl.NET;
 using System.Runtime.InteropServices;
+using System.Net.Sockets;
+using System.Net;
 
 namespace DpsCamera {
+    public class StateObject {
+        // Client socket.  
+        public Socket workSocket = null;
+        // Size of receive buffer.  
+        public const int BufferSize = 256;
+        // Receive buffer.  
+        public byte[] buffer = new byte[BufferSize];
+        // Received data string.  
+        public StringBuilder sb = new StringBuilder();
+
+
+    }
     public partial class MainForm : Form {
+        // Variable [BCR]
+        private const int BCR_PORT = 2112;
+        private const string BCR_IP = "192.168.0.1";
+        private IPAddress ipAddress;
+        private IPEndPoint remoteEP;
+        private Socket client;
+
+        private static ManualResetEvent connectDone = new ManualResetEvent(false);
+        private static ManualResetEvent sendDone = new ManualResetEvent(false);
+        private static ManualResetEvent receiveDone = new ManualResetEvent(false);
+
+        private static String response = String.Empty;
+
+        // Variable [CAMERA]
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
         public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
 
@@ -34,6 +62,12 @@ namespace DpsCamera {
         public MainForm() {
             InitializeComponent();
 
+            ipAddress = IPAddress.Parse(BCR_IP);
+            remoteEP = new IPEndPoint(ipAddress, BCR_PORT);
+            client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            client.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), client);
+
             workCountLabel.Text = "0";
             setWorkStatus(false);
             Control.CheckForIllegalCrossThreadCalls = false;
@@ -49,11 +83,120 @@ namespace DpsCamera {
             stopGrabButton.Enabled = false;
             saveJpgButton.Enabled = false;
         }
+
+        // BCR functions [START]
+        private static void ConnectCallback(IAsyncResult ar) {
+            try {
+                Socket client = (Socket)ar.AsyncState;
+
+                client.EndConnect(ar);
+
+                Console.WriteLine("Socket connected to {0}",
+                client.RemoteEndPoint.ToString());
+
+                connectDone.Set();
+            } catch (Exception e) {
+                Console.WriteLine("Socket not connected : " + e.ToString());
+            }
+        }
+        private static void Receive(Socket client) {
+            try {
+                StateObject state = new StateObject();
+                state.workSocket = client;
+                client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+            } catch (Exception e) {
+                Console.WriteLine("Socket receive error : " + e.ToString());
+            }
+        }
+
+        private static void ReceiveCallback(IAsyncResult ar) {
+            try {
+                StateObject state = (StateObject)ar.AsyncState;
+                Socket client = state.workSocket;
+
+                int bytesRead = client.EndReceive(ar);
+
+                if (bytesRead > 0) {
+                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                    Console.WriteLine(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+
+                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+                } else {
+                    if (state.sb.Length > 1) {
+                        response = state.sb.ToString();
+                    }
+
+                    receiveDone.Set();
+                }
+            } catch (Exception e) {
+                Console.WriteLine(e.ToString());
+            }
+        }
+        /*
+        private static void Send(Socket client, String data) {
+            byte[] byteData = Encoding.ASCII.GetBytes(data);
+            client.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), client);
+        }
+        private static void SendCallback(IAsyncResult ar) {
+            try {
+                Socket client = (Socket)ar.AsyncState;
+
+                int bytesSent = client.EndSend(ar);
+                Console.WriteLine("Sent {0} bytes to server.", bytesSent);
+
+                sendDone.Set();
+            } catch (Exception e) {
+                Console.WriteLine(e.ToString());
+            }
+        }
+        */
+        // BCR functions [END]
+
+        // Action functions [START]
         private void inquireButtonClick(object sender, EventArgs e) {
             InquireForm inquireForm = new InquireForm();
             inquireForm.Show();
         }
 
+        private void connectCameraButtonClick(object sender, EventArgs e) {
+            connectCamera();
+        }
+        private void disconnectCameraButtonClick(object sender, EventArgs e) {
+            disconnectCamera();
+        }
+        private void startButtonClick(object sender, EventArgs e) {
+            setWorkStatus(true);
+            acquireCameraList();
+            connectCamera();
+            startGrab();
+            saveJpgButton.Enabled = true;
+
+            Receive(client);
+
+            Console.WriteLine("Response received : {0}", response);
+        }
+        private void endButtonClick(object sender, EventArgs e) {
+            setWorkStatus(false);
+            stopGrab();
+            disconnectCamera();
+            saveJpgButton.Enabled = false;
+            productImage.Image = null;
+        }
+
+        private void startGrabButtonClick(object sender, EventArgs e) {
+            startGrab();
+        }
+
+        private void stopGrabButtonClick(object sender, EventArgs e) {
+            stopGrab();
+        }
+
+        private void saveJpgButtonClick(object sender, EventArgs e) {
+            saveJpg();
+        }
+        // Action functions [END]
+
+        // Camera functions [START]
         private void acquireCameraList() {
             // Create Device List
             System.GC.Collect();
@@ -86,45 +229,11 @@ namespace DpsCamera {
                 }
             }
 
-            if(cameraList.Count == 0) {
+            if (cameraList.Count == 0) {
                 MessageBox.Show("CameraList is empty");
             } else {
                 // MessageBox.Show(cameraList[0]);
             }
-        }
-
-        private void connectCameraButtonClick(object sender, EventArgs e) {
-            connectCamera();
-        }
-        private void disconnectCameraButtonClick(object sender, EventArgs e) {
-            disconnectCamera();
-        }
-        private void startButtonClick(object sender, EventArgs e) {
-            setWorkStatus(true);
-            acquireCameraList();
-            connectCamera();
-            startGrab();
-            saveJpgButton.Enabled = true;
-
-        }
-        private void endButtonClick(object sender, EventArgs e) {
-            setWorkStatus(false);
-            stopGrab();
-            disconnectCamera();
-            saveJpgButton.Enabled = false;
-            productImage.Image = null;
-        }
-
-        private void startGrabButtonClick(object sender, EventArgs e) {
-            startGrab();
-        }
-
-        private void stopGrabButtonClick(object sender, EventArgs e) {
-            stopGrab();
-        }
-
-        private void saveJpgButtonClick(object sender, EventArgs e) {
-            saveJpg();
         }
 
         private void connectCamera() {
@@ -352,5 +461,6 @@ namespace DpsCamera {
                 }
             }
         }
+        // Camera functions [END]
     }
 }
