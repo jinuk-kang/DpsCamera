@@ -14,16 +14,10 @@ using System.Net;
 
 namespace DpsCamera {
     public class StateObject {
-        // Client socket.  
         public Socket workSocket = null;
-        // Size of receive buffer.  
         public const int BufferSize = 256;
-        // Receive buffer.  
         public byte[] buffer = new byte[BufferSize];
-        // Received data string.  
         public StringBuilder sb = new StringBuilder();
-
-
     }
     public partial class MainForm : Form {
         // Variable [BCR]
@@ -83,9 +77,12 @@ namespace DpsCamera {
             stopGrabButton.Enabled = false;
             saveJpgButton.Enabled = false;
         }
+        private void saveAndShowData(String barcode) {
+            saveJpg(barcode);
+        }
 
         // BCR functions [START]
-        private static void ConnectCallback(IAsyncResult ar) {
+        private void ConnectCallback(IAsyncResult ar) {
             try {
                 Socket client = (Socket)ar.AsyncState;
 
@@ -99,7 +96,7 @@ namespace DpsCamera {
                 Console.WriteLine("Socket not connected : " + e.ToString());
             }
         }
-        private static void Receive(Socket client) {
+        private void Receive(Socket client) {
             try {
                 StateObject state = new StateObject();
                 state.workSocket = client;
@@ -109,7 +106,7 @@ namespace DpsCamera {
             }
         }
 
-        private static void ReceiveCallback(IAsyncResult ar) {
+        private void ReceiveCallback(IAsyncResult ar) {
             try {
                 StateObject state = (StateObject)ar.AsyncState;
                 Socket client = state.workSocket;
@@ -118,7 +115,7 @@ namespace DpsCamera {
 
                 if (bytesRead > 0) {
                     state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-                    Console.WriteLine(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                    saveAndShowData(ParseManager.parseBarcode(Encoding.ASCII.GetString(state.buffer, 0, bytesRead)));
 
                     client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
                 } else {
@@ -192,7 +189,7 @@ namespace DpsCamera {
         }
 
         private void saveJpgButtonClick(object sender, EventArgs e) {
-            saveJpg();
+            saveJpg("TEST");
         }
         // Action functions [END]
 
@@ -358,7 +355,7 @@ namespace DpsCamera {
             */
         }
 
-        private void saveJpg() {
+        private void saveJpg(String name) {
             if (false == m_bGrabbing) {
                 MessageBox.Show("Not Start Grabbing");
                 return;
@@ -384,7 +381,7 @@ namespace DpsCamera {
                 stSaveFileParam.nWidth = m_stFrameInfo.nWidth;
                 stSaveFileParam.nQuality = 80;
                 stSaveFileParam.iMethodValue = 2;
-                stSaveFileParam.pImagePath = makeImagePath();
+                stSaveFileParam.pImagePath = makeImagePath(name);
                 int nRet = m_MyCamera.MV_CC_SaveImageToFile_NET(ref stSaveFileParam);
                 if (MyCamera.MV_OK != nRet) {
                     MessageBox.Show("Save Jpeg Fail!\n" + nRet);
@@ -396,13 +393,15 @@ namespace DpsCamera {
             this.workCount++;
             workCountLabel.Text = this.workCount.ToString();
         }
-        private string makeImagePath() {
+        private string makeImagePath(String name) {
             string path = "C:\\Users\\Jin\\Desktop\\";
 
+            /*
             DateTime dateTime = DateTime.Now;
             string dateString = dateTime.ToString("yyyy_MM_dd_hh_mm_ss");
+            */
 
-            return path + dateString + ".jpg";
+            return path + name + ".jpg";
         }
         private bool RemoveCustomPixelFormats(MyCamera.MvGvspPixelType enPixelFormat) {
             Int32 nResult = ((int)enPixelFormat) & (unchecked((Int32)0x80000000));
