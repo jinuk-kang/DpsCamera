@@ -45,6 +45,7 @@ namespace DpsCamera {
 
         bool isWorking = false;
         int workCount = 0;
+        int progressTime = 0;
 
         public MainForm() {
             InitializeComponent();
@@ -55,8 +56,13 @@ namespace DpsCamera {
 
             client.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), client);
 
+            timer1.Interval = 1000;
             countLabel.Text = "0";
+            progressTimeLabel.Text = "00:00:00";
+            dateLabel.Text = DateTime.Now.ToString("yyyy-MM-dd");
+
             setWorkStatus(false);
+            
             Control.CheckForIllegalCrossThreadCalls = false;
         }
         private void setWorkStatus(bool isWorking) {
@@ -64,6 +70,12 @@ namespace DpsCamera {
             startButton.Enabled = !isWorking;
             endButton.Enabled = isWorking;
             saveImageButton.Enabled = isWorking;
+
+            if (isWorking) {
+                timer1.Start();
+            } else {
+                timer1.Stop();
+            }
         }
         private void saveAndShowData(String barcode) {
             barcodeLabel.Text = barcode;
@@ -71,6 +83,13 @@ namespace DpsCamera {
             storeCodeLabel.Text = ParseManager.parseStoreCode(barcode);
             boxOrderLabel.Text = ParseManager.parseBoxOrder(barcode);
             divergenceLabel.Text = ParseManager.parseDivergence(barcode);
+
+            dataGridView.Rows.Add(
+                DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"),
+                barcode, ParseManager.parseRound(barcode), 
+                ParseManager.parseStoreCode(barcode), 
+                ParseManager.parseBoxOrder(barcode),
+                ParseManager.parseDivergence(barcode));
 
             saveJpg(barcode);
         }
@@ -164,7 +183,38 @@ namespace DpsCamera {
             inquireForm.Show();
         }
         private void saveImageButton_Click(object sender, EventArgs e) {
-            saveJpg("TEST");
+            saveJpg("TEST"); // TODO
+        }
+        private void goTime(object sender, EventArgs e) {
+            progressTime++;
+
+            int hour = progressTime / 3600;
+            int min = (progressTime % 3600) / 60;
+            int sec = (progressTime % 3600) % 60;
+
+            String hourString = "";
+            String minString = "";
+            String secString = "";
+
+            if (hour < 10) {
+                hourString = "0" + hour.ToString();
+            } else {
+                hourString = hour.ToString();
+            }
+
+            if (min < 10) {
+                minString = "0" + min.ToString();
+            } else {
+                minString = min.ToString();
+            }
+
+            if (sec < 10) {
+                secString = "0" + sec.ToString();
+            } else {
+                secString = sec.ToString();
+            }
+
+            progressTimeLabel.Text = hourString + ":" + minString + ":" + secString;
         }
         // Action functions [END]
 
@@ -263,7 +313,6 @@ namespace DpsCamera {
             stopGrabButton.Enabled = false;
             */
         }
-
         private void disconnectCamera() {
             if (m_bGrabbing == true) {
                 m_bGrabbing = false;
@@ -285,7 +334,6 @@ namespace DpsCamera {
             stopGrabButton.Enabled = false;
             */
         }
-
         private void startGrab() {
             // Set position bit true
             m_bGrabbing = true;
@@ -311,7 +359,6 @@ namespace DpsCamera {
             saveJpgButton.Enabled = true;
             */
         }
-
         private void stopGrab() {
             // Set flag bit false
             m_bGrabbing = false;

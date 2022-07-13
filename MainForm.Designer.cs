@@ -23,6 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.captureImage = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
@@ -50,7 +51,7 @@
             this.startButton = new System.Windows.Forms.Button();
             this.inquireButton = new System.Windows.Forms.Button();
             this.endButton = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.dataGridView = new System.Windows.Forms.DataGridView();
             this.date = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.barcode = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.round = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,12 +59,13 @@
             this.boxOrder = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.divergence = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.saveImageButton = new System.Windows.Forms.Button();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.captureImage)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // captureImage
@@ -444,22 +446,23 @@
             this.endButton.UseVisualStyleBackColor = true;
             this.endButton.Click += new System.EventHandler(this.endButton_Click);
             // 
-            // dataGridView1
+            // dataGridView
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.date,
             this.barcode,
             this.round,
             this.storeCode,
             this.boxOrder,
             this.divergence});
-            this.dataGridView1.Location = new System.Drawing.Point(12, 535);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.RowTemplate.Height = 27;
-            this.dataGridView1.Size = new System.Drawing.Size(1259, 262);
-            this.dataGridView1.TabIndex = 8;
+            this.dataGridView.Location = new System.Drawing.Point(12, 535);
+            this.dataGridView.Name = "dataGridView";
+            this.dataGridView.RowHeadersWidth = 51;
+            this.dataGridView.RowTemplate.Height = 27;
+            this.dataGridView.Size = new System.Drawing.Size(1259, 262);
+            this.dataGridView.TabIndex = 8;
             // 
             // date
             // 
@@ -467,7 +470,6 @@
             this.date.MinimumWidth = 6;
             this.date.Name = "date";
             this.date.ReadOnly = true;
-            this.date.Width = 125;
             // 
             // barcode
             // 
@@ -475,7 +477,6 @@
             this.barcode.MinimumWidth = 6;
             this.barcode.Name = "barcode";
             this.barcode.ReadOnly = true;
-            this.barcode.Width = 125;
             // 
             // round
             // 
@@ -483,7 +484,6 @@
             this.round.MinimumWidth = 6;
             this.round.Name = "round";
             this.round.ReadOnly = true;
-            this.round.Width = 125;
             // 
             // storeCode
             // 
@@ -491,7 +491,6 @@
             this.storeCode.MinimumWidth = 6;
             this.storeCode.Name = "storeCode";
             this.storeCode.ReadOnly = true;
-            this.storeCode.Width = 125;
             // 
             // boxOrder
             // 
@@ -499,7 +498,6 @@
             this.boxOrder.MinimumWidth = 6;
             this.boxOrder.Name = "boxOrder";
             this.boxOrder.ReadOnly = true;
-            this.boxOrder.Width = 125;
             // 
             // divergence
             // 
@@ -507,7 +505,6 @@
             this.divergence.MinimumWidth = 6;
             this.divergence.Name = "divergence";
             this.divergence.ReadOnly = true;
-            this.divergence.Width = 125;
             // 
             // saveImageButton
             // 
@@ -520,13 +517,17 @@
             this.saveImageButton.UseVisualStyleBackColor = true;
             this.saveImageButton.Click += new System.EventHandler(this.saveImageButton_Click);
             // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.goTime);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1283, 809);
             this.Controls.Add(this.saveImageButton);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.dataGridView);
             this.Controls.Add(this.endButton);
             this.Controls.Add(this.inquireButton);
             this.Controls.Add(this.startButton);
@@ -545,7 +546,7 @@
             this.tableLayoutPanel3.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -580,7 +581,7 @@
         private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.Button inquireButton;
         private System.Windows.Forms.Button endButton;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView dataGridView;
         private System.Windows.Forms.DataGridViewTextBoxColumn date;
         private System.Windows.Forms.DataGridViewTextBoxColumn barcode;
         private System.Windows.Forms.DataGridViewTextBoxColumn round;
@@ -588,5 +589,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn boxOrder;
         private System.Windows.Forms.DataGridViewTextBoxColumn divergence;
         private System.Windows.Forms.Button saveImageButton;
+        private System.Windows.Forms.Timer timer1;
     }
 }
