@@ -70,7 +70,7 @@
             // 
             // captureImage
             // 
-            this.captureImage.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.captureImage.BackColor = System.Drawing.SystemColors.ControlLight;
             this.captureImage.Location = new System.Drawing.Point(12, 12);
             this.captureImage.Name = "captureImage";
             this.captureImage.Size = new System.Drawing.Size(500, 500);
@@ -449,6 +449,7 @@
             // dataGridView
             // 
             this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridView.BackgroundColor = System.Drawing.SystemColors.Control;
             this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.date,
