@@ -13,7 +13,14 @@ using System.Net.Sockets;
 using System.Net;
 
 namespace DpsCamera {
-    public partial class MainForm : Form {
+    public class StateObject {
+        public Socket workSocket = null;
+        public const int BufferSize = 256;
+        public byte[] buffer = new byte[BufferSize];
+        public StringBuilder sb = new StringBuilder();
+    }
+    public partial class OldForm : Form {
+        // Variable [BCR]
         private const int BCR_PORT = 2112;
         private const string BCR_IP = "192.168.0.1";
         private IPAddress ipAddress;
@@ -46,7 +53,7 @@ namespace DpsCamera {
         bool isWorking = false;
         int workCount = 0;
 
-        public MainForm() {
+        public OldForm() {
             InitializeComponent();
 
             ipAddress = IPAddress.Parse(BCR_IP);
@@ -55,7 +62,7 @@ namespace DpsCamera {
 
             client.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), client);
 
-            countLabel.Text = "0";
+            workCountLabel.Text = "0";
             setWorkStatus(false);
             Control.CheckForIllegalCrossThreadCalls = false;
         }
@@ -63,15 +70,14 @@ namespace DpsCamera {
             this.isWorking = isWorking;
             startButton.Enabled = !isWorking;
             endButton.Enabled = isWorking;
-            saveImageButton.Enabled = isWorking;
+
+            connectCameraButton.Enabled = false; // TEST
+            disconnectCameraButton.Enabled = false;
+            startGrabButton.Enabled = false;
+            stopGrabButton.Enabled = false;
+            saveJpgButton.Enabled = false;
         }
         private void saveAndShowData(String barcode) {
-            barcodeLabel.Text = barcode;
-            roundLabel.Text = ParseManager.parseRound(barcode);
-            storeCodeLabel.Text = ParseManager.parseStoreCode(barcode);
-            boxOrderLabel.Text = ParseManager.parseBoxOrder(barcode);
-            divergenceLabel.Text = ParseManager.parseDivergence(barcode);
-
             saveJpg(barcode);
         }
 
@@ -99,6 +105,7 @@ namespace DpsCamera {
                 Console.WriteLine("Socket receive error : " + e.ToString());
             }
         }
+
         private void ReceiveCallback(IAsyncResult ar) {
             try {
                 StateObject state = (StateObject)ar.AsyncState;
@@ -143,27 +150,45 @@ namespace DpsCamera {
         // BCR functions [END]
 
         // Action functions [START]
-        private void startButton_Click(object sender, EventArgs e) {
+        private void inquireButtonClick(object sender, EventArgs e) {
+            InquireForm inquireForm = new InquireForm();
+            inquireForm.Show();
+        }
+
+        private void connectCameraButtonClick(object sender, EventArgs e) {
+            connectCamera();
+        }
+        private void disconnectCameraButtonClick(object sender, EventArgs e) {
+            disconnectCamera();
+        }
+        private void startButtonClick(object sender, EventArgs e) {
             setWorkStatus(true);
             acquireCameraList();
             connectCamera();
             startGrab();
+            saveJpgButton.Enabled = true;
 
             Receive(client);
 
             Console.WriteLine("Response received : {0}", response);
         }
-        private void endButton_Click(object sender, EventArgs e) {
+        private void endButtonClick(object sender, EventArgs e) {
             setWorkStatus(false);
             stopGrab();
             disconnectCamera();
-            captureImage.Image = null;
+            saveJpgButton.Enabled = false;
+            productImage.Image = null;
         }
-        private void inquireButton_Click(object sender, EventArgs e) {
-            InquireForm inquireForm = new InquireForm();
-            inquireForm.Show();
+
+        private void startGrabButtonClick(object sender, EventArgs e) {
+            startGrab();
         }
-        private void saveImageButton_Click(object sender, EventArgs e) {
+
+        private void stopGrabButtonClick(object sender, EventArgs e) {
+            stopGrab();
+        }
+
+        private void saveJpgButtonClick(object sender, EventArgs e) {
             saveJpg("TEST");
         }
         // Action functions [END]
@@ -329,6 +354,7 @@ namespace DpsCamera {
             saveJpgButton.Enabled = false;
             */
         }
+
         private void saveJpg(String name) {
             if (false == m_bGrabbing) {
                 MessageBox.Show("Not Start Grabbing");
@@ -365,7 +391,7 @@ namespace DpsCamera {
 
             // MessageBox.Show("Save Succeed!");
             this.workCount++;
-            countLabel.Text = this.workCount.ToString();
+            workCountLabel.Text = this.workCount.ToString();
         }
         private string makeImagePath(String name) {
             string path = "C:\\Users\\Jin\\Desktop\\";
@@ -416,7 +442,7 @@ namespace DpsCamera {
                         continue;
                     }
 
-                    //stDisplayInfo.hWnd = productImage.Handle;
+                    stDisplayInfo.hWnd = productImage.Handle;
                     stDisplayInfo.pData = stFrameInfo.pBufAddr;
                     stDisplayInfo.nDataLen = stFrameInfo.stFrameInfo.nFrameLen;
                     stDisplayInfo.nWidth = stFrameInfo.stFrameInfo.nWidth;
