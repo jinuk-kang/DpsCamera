@@ -56,10 +56,17 @@ namespace DpsCamera {
 
             client.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), client);
 
+            this.MinimumSize = new System.Drawing.Size(1000, 658);
+
             timer1.Interval = 1000;
             countLabel.Text = "0";
             progressTimeLabel.Text = "00:00:00";
             dateLabel.Text = DateTime.Now.ToString("yyyy-MM-dd");
+            barcodeLabel.Text = "";
+            roundLabel.Text = "";
+            storeCodeLabel.Text = "";
+            boxOrderLabel.Text = "";
+            divergenceLabel.Text = "";
 
             setWorkStatus(false);
             
@@ -176,6 +183,12 @@ namespace DpsCamera {
             setWorkStatus(false);
             stopGrab();
             disconnectCamera();
+
+            barcodeLabel.Text = "";
+            roundLabel.Text = "";
+            storeCodeLabel.Text = "";
+            boxOrderLabel.Text = "";
+            divergenceLabel.Text = "";
             captureImage.Image = null;
         }
         private void inquireButton_Click(object sender, EventArgs e) {
@@ -257,7 +270,6 @@ namespace DpsCamera {
                 // MessageBox.Show(cameraList[0]);
             }
         }
-
         private void connectCamera() {
             if (m_stDeviceList.nDeviceNum == 0 || cameraList.Count == 0) {
                 MessageBox.Show("No device, please select");
@@ -305,13 +317,6 @@ namespace DpsCamera {
             m_MyCamera.MV_CC_SetEnumValue_NET("TriggerMode", (uint)MyCamera.MV_CAM_TRIGGER_MODE.MV_TRIGGER_MODE_OFF);
 
             //bnGetParam_Click(null, null);// Get parameters
-
-            /*
-            connectCameraButton.Enabled = false;
-            disconnectCameraButton.Enabled = true;
-            startGrabButton.Enabled = true;
-            stopGrabButton.Enabled = false;
-            */
         }
         private void disconnectCamera() {
             if (m_bGrabbing == true) {
@@ -326,13 +331,6 @@ namespace DpsCamera {
             // Close Device
             m_MyCamera.MV_CC_CloseDevice_NET();
             m_MyCamera.MV_CC_DestroyDevice_NET();
-
-            /*
-            connectCameraButton.Enabled = true;
-            disconnectCameraButton.Enabled = false;
-            startGrabButton.Enabled = false;
-            stopGrabButton.Enabled = false;
-            */
         }
         private void startGrab() {
             // Set position bit true
@@ -352,12 +350,6 @@ namespace DpsCamera {
                 MessageBox.Show("Start Grabbing Fail!\n" + nRet);
                 return;
             }
-
-            /*
-            startGrabButton.Enabled = false;
-            stopGrabButton.Enabled = true;
-            saveJpgButton.Enabled = true;
-            */
         }
         private void stopGrab() {
             // Set flag bit false
@@ -369,12 +361,6 @@ namespace DpsCamera {
             if (nRet != MyCamera.MV_OK) {
                 MessageBox.Show("Stop Grabbing Fail!\n" + nRet);
             }
-
-            /*
-            startGrabButton.Enabled = true;
-            stopGrabButton.Enabled = false;
-            saveJpgButton.Enabled = false;
-            */
         }
         private void saveJpg(String name) {
             if (false == m_bGrabbing) {
