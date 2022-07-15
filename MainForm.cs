@@ -85,20 +85,35 @@ namespace DpsCamera {
             }
         }
         private void saveAndShowData(String barcode) {
-            barcodeLabel.Text = barcode;
-            roundLabel.Text = ParseManager.parseRound(barcode);
-            storeCodeLabel.Text = ParseManager.parseStoreCode(barcode);
-            boxOrderLabel.Text = ParseManager.parseBoxOrder(barcode);
-            divergenceLabel.Text = ParseManager.parseDivergence(barcode);
+            if (ParseManager.isNoRead(barcode)) {
+                barcodeLabel.Text = "NG";
+                roundLabel.Text = "";
+                storeCodeLabel.Text = "";
+                boxOrderLabel.Text = "";
+                divergenceLabel.Text = "";
 
-            dataGridView.Rows.Add(
-                DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"),
-                barcode, ParseManager.parseRound(barcode), 
-                ParseManager.parseStoreCode(barcode), 
-                ParseManager.parseBoxOrder(barcode),
-                ParseManager.parseDivergence(barcode));
+                dataGridView.Rows.Add(
+                    DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"),
+                    "NG", "", "", "", "");
 
-            saveJpg(barcode);
+                saveJpg("");
+            } else {
+                barcodeLabel.Text = barcode;
+                roundLabel.Text = ParseManager.parseRound(barcode);
+                storeCodeLabel.Text = ParseManager.parseStoreCode(barcode);
+                boxOrderLabel.Text = ParseManager.parseBoxOrder(barcode);
+                divergenceLabel.Text = ParseManager.parseDivergence(barcode);
+
+                dataGridView.Rows.Add(
+                    DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"),
+                    barcode, 
+                    ParseManager.parseRound(barcode),
+                    ParseManager.parseStoreCode(barcode),
+                    ParseManager.parseBoxOrder(barcode),
+                    ParseManager.parseDivergence(barcode));
+
+                saveJpg(barcode);
+            }
         }
 
         // BCR functions [START]
@@ -389,6 +404,7 @@ namespace DpsCamera {
                 stSaveFileParam.nQuality = 80;
                 stSaveFileParam.iMethodValue = 2;
                 stSaveFileParam.pImagePath = makeImagePath(name);
+                
                 int nRet = m_MyCamera.MV_CC_SaveImageToFile_NET(ref stSaveFileParam);
                 if (MyCamera.MV_OK != nRet) {
                     MessageBox.Show("Save Jpeg Fail!\n" + nRet);
@@ -401,14 +417,18 @@ namespace DpsCamera {
             countLabel.Text = this.workCount.ToString();
         }
         private string makeImagePath(String name) {
-            string path = "C:\\Users\\Jin\\Desktop\\";
+            string yearString = DateTime.Now.ToString("yyyy");
+            string monthDayString = DateTime.Now.ToString("MM/dd");
 
-            /*
-            DateTime dateTime = DateTime.Now;
-            string dateString = dateTime.ToString("yyyy_MM_dd_hh_mm_ss");
-            */
+            string normalPath = "C:\\Users\\Jin\\Desktop\\" + yearString + "\\" + monthDayString + "\\";
+            string noReadPath = "C:\\Users\\Jin\\Desktop\\" + yearString + "\\" + monthDayString + "_NG\\";
 
-            return path + name + ".jpg";
+            if (ParseManager.isNoRead(name)) {
+                string timeString = DateTime.Now.ToString("hh:mm:ss");
+                return noReadPath + "NG_" + timeString + ".jpg";
+            } else {
+                return normalPath + name + ".jpg";
+            }
         }
         private bool RemoveCustomPixelFormats(MyCamera.MvGvspPixelType enPixelFormat) {
             Int32 nResult = ((int)enPixelFormat) & (unchecked((Int32)0x80000000));
