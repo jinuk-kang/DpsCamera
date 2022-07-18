@@ -16,34 +16,119 @@ namespace DpsCamera {
         private DateTime selectedDate = DateTime.Now;
         private string storeCode = "";
 
+        private List<String> files = new List<String>();
+
         public InquireForm() {
             InitializeComponent();
 
             this.Text = "조회하기";
 
             this.inqureButton.Click += inqureButtonClicked;
-            this.resultListView.Hide();
-
-            search();
         }
 
         public void inqureButtonClicked(object sender, EventArgs e) {
-            string[] files = makeSearchPath(false);
-        
-            foreach (string file in files) {
-                Console.WriteLine(file);
+            files.Clear();
+            files = makeSearchPath(false);
+            resultGridView.Rows.Clear();
+
+            if (files[0] == "NoData") {
+                MessageBox.Show("조회된 데이터가 없습니다.");
+                resultGridView.Rows.Clear();
+                resultImage.Image = null;
+            } else {
+                if (storeCode != "") {
+                    List<String> newFiles = new List<String>();
+
+                    foreach (string file in files) {
+                        Console.WriteLine(file.Substring(file.Length - 13, 5));
+                        if (file.Substring(file.Length-13, 5) == storeCode) {
+                            newFiles.Add(file);
+                        }
+                    }
+
+                    files = newFiles;
+                }
+
+                if (files.Count > 0) {
+                    resultImage.Load(@files[0]);
+
+                    foreach (string file in files) {
+                        string[] pa = file.Split('\\');
+                        List<String> showList = new List<string>();
+
+                        for(int i=0;i<pa.Length;i++) {
+                            if (i >= 4) {
+                                showList.Add(pa[i]);
+
+                                if (i != pa.Length-1) {
+                                    showList.Add("\\");
+                                }
+                            }
+                        }
+
+                        string finalFilePath = "";
+
+                        foreach (string s in showList) {
+                            finalFilePath += s;
+                        }
+
+                        resultGridView.Rows.Add(finalFilePath);
+                    }
+                } else {
+                    resultImage.Image = null;
+                    resultGridView.Rows.Clear();
+                    MessageBox.Show("조회된 데이터가 없습니다.");
+                }
             }
         }
 
         private void ngInquireButtonClicked(object sender, EventArgs e) {
-            string[] files = makeSearchPath(true);
+            storeCode = "";
+            textBox1.Text = storeCode;
+            resultGridView.Rows.Clear();
 
-            foreach (string file in files) {
-                Console.WriteLine(file);
+            files.Clear();
+            files = makeSearchPath(true);
+
+            if (files[0] == "NoData") {
+                MessageBox.Show("조회된 데이터가 없습니다.");
+                resultGridView.Rows.Clear();
+                resultImage.Image = null;
+            } else {
+                if (files.Count > 0) {
+                    resultImage.Load(@files[0]);
+
+                    foreach (string file in files) {
+                        string[] pa = file.Split('\\');
+                        List<String> showList = new List<string>();
+
+                        for (int i = 0; i < pa.Length; i++) {
+                            if (i >= 4) {
+                                showList.Add(pa[i]);
+
+                                if (i != pa.Length - 1) {
+                                    showList.Add("\\");
+                                }
+                            }
+                        }
+
+                        string finalFilePath = "";
+
+                        foreach (string s in showList) {
+                            finalFilePath += s;
+                        }
+
+                        resultGridView.Rows.Add(finalFilePath);
+                    }
+                } else {
+                    resultImage.Image = null;
+                    resultGridView.Rows.Clear();
+                    MessageBox.Show("조회된 데이터가 없습니다.");
+                }
             }
         }
 
-        private string[] makeSearchPath(bool isNoRead) {
+        private List<String> makeSearchPath(bool isNoRead) {
             string yearString = selectedDate.ToString("yyyy");
             string monthDayString = selectedDate.ToString("MM-dd");
 
@@ -51,62 +136,50 @@ namespace DpsCamera {
 
             if (isNoRead) {
                 string noReadPath = yearDirPath + "\\" + monthDayString + "_NG";
+                List<String> result = new List<String>();
 
                 try {
-                    return Directory.GetFiles(noReadPath, $"*.*");
+                    foreach (string f in Directory.GetFiles(noReadPath, $"*.*")) {
+                        result.Add(f);
+                    }
+
+                    return result;
                 } catch (System.IO.DirectoryNotFoundException) {
-                    string[] er = { "NoData" };
-                    return er;
+                    result.Add("NoData");
+
+                    return result;
                 }
             } else {
                 string normalPath = yearDirPath + "\\" + monthDayString;
+                List<String> result = new List<String>();
+
                 try {
-                    return Directory.GetFiles(normalPath, $"*.*");
+                    foreach (string f in Directory.GetFiles(normalPath, $"*.*")) {
+                        result.Add(f);
+                    }
+
+                    return result;
                 } catch (System.IO.DirectoryNotFoundException) {
-                    string[] er = { "NoData" };
-                    return er;
+                    result.Add("NoData");
+
+                    return result;
                 }
             }
         }
-        private string search() {
-            // string[] files = Directory.GetFiles("");
-
-            //foreach (string fileName in files) {
-            //     resultListView.Items.Add("a");
-            //  }
-
-            string[] files = { "A", "B", "C" };
-
-
-            resultListView.View = View.Details;
-
-            resultListView.CheckBoxes = true; // check box 나오게 세팅 하는 부분이다. properties에서 해도 된다.
-            resultListView.BeginUpdate();
-
-            ListViewItem item = new ListViewItem(files);
-
-            resultListView.Items.Add(item); // ListView.Items.Add 로 Listview에 넣어 준다.
-            resultListView.EndUpdate();
-
-            //응용해서 for문 돌려서 입력을 한번에도 할 수 있다.
-            /*
-            for (int i = 0; i < textValueLine.Length; i++) {
-                string[] itemValue = textValueLine[i].Split(AppSettingValue.delimiterChars);
-                ListViewItem itm = new ListViewItem(itemValue);
-                ShowListView.Items.Add(itm);
-            }
-            */
-
-
-            return "";
-        }
-
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e) {
+            storeCode = "";
+            textBox1.Text = storeCode;
             selectedDate = dateTimePicker1.Value.Date;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e) {
             storeCode = textBox1.Text;
+        }
+
+        private void resultGridView_CellContentClick(object sender, DataGridViewCellEventArgs e) {
+            int selectedIndex = resultGridView.CurrentCell.RowIndex;
+
+            resultImage.Load(@files[selectedIndex]);
         }
     }
 }

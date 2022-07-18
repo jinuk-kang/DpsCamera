@@ -30,9 +30,7 @@
         {
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.label1 = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.resultListView = new System.Windows.Forms.ListView();
-            this.imagePath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.resultImage = new System.Windows.Forms.PictureBox();
             this.inqureButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
@@ -41,11 +39,14 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.resultGridView = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ((System.ComponentModel.ISupportInitialize)(this.resultImage)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.resultGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // dateTimePicker1
@@ -71,32 +72,16 @@
             this.label1.Text = "날짜";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // pictureBox1
+            // resultImage
             // 
-            this.pictureBox1.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.pictureBox1.Location = new System.Drawing.Point(3, 4);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(502, 500);
-            this.pictureBox1.TabIndex = 9;
-            this.pictureBox1.TabStop = false;
-            // 
-            // resultListView
-            // 
-            this.resultListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.imagePath});
-            this.resultListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.resultListView.HideSelection = false;
-            this.resultListView.Location = new System.Drawing.Point(3, 237);
-            this.resultListView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.resultListView.Name = "resultListView";
-            this.resultListView.Size = new System.Drawing.Size(541, 370);
-            this.resultListView.TabIndex = 10;
-            this.resultListView.UseCompatibleStateImageBehavior = false;
-            // 
-            // imagePath
-            // 
-            this.imagePath.Text = "이미지 경로";
+            this.resultImage.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.resultImage.Location = new System.Drawing.Point(3, 4);
+            this.resultImage.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.resultImage.Name = "resultImage";
+            this.resultImage.Size = new System.Drawing.Size(502, 500);
+            this.resultImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.resultImage.TabIndex = 9;
+            this.resultImage.TabStop = false;
             // 
             // inqureButton
             // 
@@ -186,7 +171,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel1, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel2, 0, 1);
-            this.tableLayoutPanel3.Controls.Add(this.resultListView, 0, 2);
+            this.tableLayoutPanel3.Controls.Add(this.resultGridView, 0, 2);
             this.tableLayoutPanel3.Location = new System.Drawing.Point(511, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 3;
@@ -201,7 +186,7 @@
             this.tableLayoutPanel4.ColumnCount = 2;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.87936F));
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.12064F));
-            this.tableLayoutPanel4.Controls.Add(this.pictureBox1, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.resultImage, 0, 0);
             this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel3, 1, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
@@ -210,6 +195,32 @@
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.Size = new System.Drawing.Size(1061, 664);
             this.tableLayoutPanel4.TabIndex = 19;
+            // 
+            // resultGridView
+            // 
+            this.resultGridView.AllowUserToAddRows = false;
+            this.resultGridView.AllowUserToDeleteRows = false;
+            this.resultGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.resultGridView.BackgroundColor = System.Drawing.SystemColors.ControlLight;
+            this.resultGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.resultGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column1});
+            this.resultGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.resultGridView.Location = new System.Drawing.Point(3, 236);
+            this.resultGridView.Name = "resultGridView";
+            this.resultGridView.ReadOnly = true;
+            this.resultGridView.RowHeadersWidth = 51;
+            this.resultGridView.RowTemplate.Height = 27;
+            this.resultGridView.Size = new System.Drawing.Size(541, 372);
+            this.resultGridView.TabIndex = 18;
+            this.resultGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.resultGridView_CellContentClick);
+            // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "이미지 경로";
+            this.Column1.MinimumWidth = 6;
+            this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
             // 
             // InquireForm
             // 
@@ -220,12 +231,13 @@
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "InquireForm";
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.resultImage)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.resultGridView)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -234,16 +246,16 @@
 
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.ListView resultListView;
+        private System.Windows.Forms.PictureBox resultImage;
         private System.Windows.Forms.Button inqureButton;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.ColumnHeader imagePath;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button ngInquireButton;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private System.Windows.Forms.DataGridView resultGridView;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
     }
 }
