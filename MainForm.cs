@@ -83,19 +83,18 @@ namespace DpsCamera {
             Control.CheckForIllegalCrossThreadCalls = false;
         }
         private void clearOldData() {
-            DateTime aMonthAgo = DateTime.Now.AddMonths(-1);
-            string dirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + aMonthAgo.ToString("yyyy -MM-dd");
-            string noReadDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + aMonthAgo.ToString("yyyy -MM-dd");
-
+            string dirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image";
             DirectoryInfo dir = new DirectoryInfo(dirPath);
-            DirectoryInfo noReadDir = new DirectoryInfo(noReadDirPath);
 
             if (dir.Exists) {
-                Directory.Delete(dirPath, true);
-            }
+                DirectoryInfo[] dirList = dir.GetDirectories();
 
-            if (noReadDir.Exists) {
-                Directory.Delete(noReadDirPath, true);
+                foreach (DirectoryInfo di in dirList) {
+                    if (di.LastWriteTime < DateTime.Now.AddDays(-30)) {
+                        di.Attributes = FileAttributes.Normal;
+                        di.Delete(true);
+                    }
+                }
             }
         }
         private void setTimerOffset() {
@@ -281,6 +280,7 @@ namespace DpsCamera {
         }
         private void formClosing(object sender, FormClosingEventArgs e) {
             setWorkStatus(false);
+
             stopGrab();
             disconnectCamera();
 
@@ -416,7 +416,12 @@ namespace DpsCamera {
         private void stopGrab() {
             // Set flag bit false
             m_bGrabbing = false;
-            m_hReceiveThread.Join();
+
+            if (m_hReceiveThread != null) {
+                m_hReceiveThread.Join();
+            } else {
+                return;
+            }
 
             // Stop Grabbing
             int nRet = m_MyCamera.MV_CC_StopGrabbing_NET();

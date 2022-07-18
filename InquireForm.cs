@@ -12,8 +12,9 @@ using System.Windows.Forms;
 
 namespace DpsCamera {
     public partial class InquireForm : Form {
-        private String LOCAL_USER_DIR_NAME = "YEIN";
+        private String LOCAL_USER_DIR_NAME = "Jin";
 
+        private bool isAllDay = false;
         private DateTime selectedDate = DateTime.Now;
         private string storeCode = "";
 
@@ -147,39 +148,70 @@ namespace DpsCamera {
         }
 
         private List<String> makeSearchPath(bool isNoRead) {
-            string dateString = selectedDate.ToString("yyyy-MM-dd");
+            if (!isAllDay) {
+                string dateString = selectedDate.ToString("yyyy-MM-dd");
 
-            string dateDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + dateString;
+                string dateDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + dateString;
 
-            if (isNoRead) {
-                string noReadPath = dateDirPath + "_NG";
-                List<String> result = new List<String>();
+                if (isNoRead) {
+                    string noReadPath = dateDirPath + "_NG";
+                    List<String> result = new List<String>();
 
-                try {
-                    foreach (string f in Directory.GetFiles(noReadPath, $"*.*")) {
-                        result.Add(f);
+                    try {
+                        foreach (string f in Directory.GetFiles(noReadPath, $"*.*")) {
+                            result.Add(f);
+                        }
+
+                        return result;
+                    } catch (System.IO.DirectoryNotFoundException) {
+                        result.Add("NoData");
+
+                        return result;
                     }
+                } else {
+                    List<String> result = new List<String>();
 
-                    return result;
-                } catch (System.IO.DirectoryNotFoundException) {
-                    result.Add("NoData");
+                    try {
+                        foreach (string f in Directory.GetFiles(dateDirPath, $"*.*")) {
+                            result.Add(f);
+                        }
 
-                    return result;
+                        return result;
+                    } catch (System.IO.DirectoryNotFoundException) {
+                        result.Add("NoData");
+
+                        return result;
+                    }
                 }
             } else {
+                string parentPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image";
+
+                DirectoryInfo parentDir = new DirectoryInfo(parentPath);
                 List<String> result = new List<String>();
 
-                try {
-                    foreach (string f in Directory.GetFiles(dateDirPath, $"*.*")) {
-                        result.Add(f);
+                foreach (DirectoryInfo d in parentDir.GetDirectories()) {
+                    string[] fs = Directory.GetFiles(d.FullName, $"*.*");
+
+                    foreach (string a in fs) {
+                        string[] ss = a.Split('\\');
+
+                        if (isNoRead) {
+                            if (ss[ss.Length-1].Substring(0, 2) == "NG") {
+                                result.Add(a);
+                            }
+                        } else {
+                            if (ss[ss.Length - 1].Substring(0, 2) != "NG") {
+                                result.Add(a);
+                            }
+                        }
                     }
+                } 
 
-                    return result;
-                } catch (System.IO.DirectoryNotFoundException) {
+                if (result.Count == 0) {
                     result.Add("NoData");
-
-                    return result;
                 }
+
+                return result;
             }
         }
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e) {
@@ -203,6 +235,22 @@ namespace DpsCamera {
             if (selectedFilePath != "") {
                 Process.Start(selectedFilePath);
             }
+        }
+
+        private void openDirButton_Click(object sender, EventArgs e) {
+            if (selectedFilePath != "") {
+                string dirPath = "";
+                string[] sList = selectedFilePath.Split('\\');
+
+                for (int i=0; i<sList.Length-1; i++) {
+                    dirPath += sList[i];
+                }
+
+                Process.Start(dirPath);
+            }
+        }
+        private void checkBox1_CheckedChanged(object sender, EventArgs e) {
+            this.isAllDay = !this.isAllDay;
         }
     }
 }
