@@ -83,6 +83,7 @@
             this.captureImage.Location = new System.Drawing.Point(3, 3);
             this.captureImage.Name = "captureImage";
             this.captureImage.Size = new System.Drawing.Size(494, 496);
+            this.captureImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.captureImage.TabIndex = 0;
             this.captureImage.TabStop = false;
             // 

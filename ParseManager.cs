@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace DpsCamera {
     internal class ParseManager {
-
         public static bool isNoRead(String input) {
             return input == "NoRead";
         }

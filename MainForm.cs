@@ -11,6 +11,9 @@ using MvCamCtrl.NET;
 using System.Runtime.InteropServices;
 using System.Net.Sockets;
 using System.Net;
+using System.IO;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace DpsCamera {
     public partial class MainForm : Form {
@@ -25,6 +28,9 @@ namespace DpsCamera {
         private static ManualResetEvent receiveDone = new ManualResetEvent(false);
 
         private static String response = String.Empty;
+
+        private int PHOTO_DELAY_TIME = 300; // milliseconds
+        private String LOCAL_USER_DIR_NAME = "YEIN";
 
         // Variable [CAMERA]
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
@@ -95,8 +101,6 @@ namespace DpsCamera {
                 dataGridView.Rows.Add(
                     DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"),
                     "NG", "", "", "", "");
-
-                saveJpg("");
             } else {
                 barcodeLabel.Text = barcode;
                 roundLabel.Text = ParseManager.parseRound(barcode);
@@ -111,9 +115,11 @@ namespace DpsCamera {
                     ParseManager.parseStoreCode(barcode),
                     ParseManager.parseBoxOrder(barcode),
                     ParseManager.parseDivergence(barcode));
-
-                saveJpg(barcode);
             }
+
+            Thread.Sleep(PHOTO_DELAY_TIME);
+
+            saveJpg(barcode);
         }
 
         // BCR functions [START]
@@ -378,6 +384,8 @@ namespace DpsCamera {
             }
         }
         private void saveJpg(String name) {
+            String imageName = makeImagePath(name);
+
             if (false == m_bGrabbing) {
                 MessageBox.Show("Not Start Grabbing");
                 return;
@@ -392,7 +400,7 @@ namespace DpsCamera {
 
             lock (BufForDriverLock) {
                 if (m_stFrameInfo.nFrameLen == 0) {
-                    MessageBox.Show("Save Jpeg Fail!");
+                    //MessageBox.Show("Save Jpeg Fail!");
                     return;
                 }
                 stSaveFileParam.enImageType = MyCamera.MV_SAVE_IAMGE_TYPE.MV_Image_Jpeg;
@@ -403,14 +411,17 @@ namespace DpsCamera {
                 stSaveFileParam.nWidth = m_stFrameInfo.nWidth;
                 stSaveFileParam.nQuality = 80;
                 stSaveFileParam.iMethodValue = 2;
-                stSaveFileParam.pImagePath = makeImagePath(name);
+                stSaveFileParam.pImagePath = imageName;
                 
                 int nRet = m_MyCamera.MV_CC_SaveImageToFile_NET(ref stSaveFileParam);
                 if (MyCamera.MV_OK != nRet) {
-                    MessageBox.Show("Save Jpeg Fail!\n" + nRet);
+                    //MessageBox.Show("Save Jpeg Fail!\n" + nRet);
+                    // TODO
                     return;
                 }
             }
+
+            captureImage.Load(@imageName);
 
             // MessageBox.Show("Save Succeed!");
             this.workCount++;
@@ -418,16 +429,33 @@ namespace DpsCamera {
         }
         private string makeImagePath(String name) {
             string yearString = DateTime.Now.ToString("yyyy");
-            string monthDayString = DateTime.Now.ToString("MM/dd");
+            string monthDayString = DateTime.Now.ToString("MM-dd");
+            
+            string yearDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + yearString;
+            DirectoryInfo yearDir = new DirectoryInfo(yearDirPath);
 
-            string normalPath = "C:\\Users\\Jin\\Desktop\\" + yearString + "\\" + monthDayString + "\\";
-            string noReadPath = "C:\\Users\\Jin\\Desktop\\" + yearString + "\\" + monthDayString + "_NG\\";
+            if (!yearDir.Exists) {
+                yearDir.Create();
+            }
 
             if (ParseManager.isNoRead(name)) {
-                string timeString = DateTime.Now.ToString("hh:mm:ss");
-                return noReadPath + "NG_" + timeString + ".jpg";
+                string noReadPath = yearDirPath + "\\" + monthDayString + "_NG";
+                DirectoryInfo noReadDir = new DirectoryInfo(noReadPath);
+
+                if (!noReadDir.Exists) {
+                    noReadDir.Create();
+                }
+
+                return noReadPath + "\\NG_" + DateTime.Now.ToString("hh_mm_ss") + ".jpg";
             } else {
-                return normalPath + name + ".jpg";
+                string normalPath = yearDirPath + "\\" + monthDayString;
+                DirectoryInfo normalDir = new DirectoryInfo(normalPath);
+
+                if (!normalDir.Exists) {
+                    normalDir.Create();
+                }
+
+                return normalPath + "\\" + name + ".jpg";
             }
         }
         private bool RemoveCustomPixelFormats(MyCamera.MvGvspPixelType enPixelFormat) {
