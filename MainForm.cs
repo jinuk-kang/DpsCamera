@@ -29,7 +29,7 @@ namespace DpsCamera {
 
         private static String response = String.Empty;
 
-        private int PHOTO_DELAY_TIME = 300; // milliseconds
+        private int PHOTO_DELAY_TIME = 1000; // milliseconds
         private String LOCAL_USER_DIR_NAME = "YEIN";
 
         // Variable [CAMERA]
@@ -76,9 +76,33 @@ namespace DpsCamera {
             boxOrderLabel.Text = "";
             divergenceLabel.Text = "";
 
+            //setTimerOffset();
+            clearOldData();
             setWorkStatus(false);
             
             Control.CheckForIllegalCrossThreadCalls = false;
+        }
+        private void clearOldData() {
+            DateTime aMonthAgo = DateTime.Now.AddMonths(-1);
+            string dirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + aMonthAgo.ToString("yyyy -MM-dd");
+            string noReadDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + aMonthAgo.ToString("yyyy -MM-dd");
+
+            DirectoryInfo dir = new DirectoryInfo(dirPath);
+            DirectoryInfo noReadDir = new DirectoryInfo(noReadDirPath);
+
+            if (dir.Exists) {
+                Directory.Delete(dirPath, true);
+            }
+
+            if (noReadDir.Exists) {
+                Directory.Delete(noReadDirPath, true);
+            }
+        }
+        private void setTimerOffset() {
+            string path = @"C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\BarcodeImageScanner\\timer_offset.txt";
+            string[] textValue = System.IO.File.ReadAllLines(path);
+
+            PHOTO_DELAY_TIME = Convert.ToInt32(textValue[0]);
         }
         private void setWorkStatus(bool isWorking) {
             this.isWorking = isWorking;
@@ -254,6 +278,18 @@ namespace DpsCamera {
             }
 
             progressTimeLabel.Text = hourString + ":" + minString + ":" + secString;
+        }
+        private void formClosing(object sender, FormClosingEventArgs e) {
+            setWorkStatus(false);
+            stopGrab();
+            disconnectCamera();
+
+            barcodeLabel.Text = "";
+            roundLabel.Text = "";
+            storeCodeLabel.Text = "";
+            boxOrderLabel.Text = "";
+            divergenceLabel.Text = "";
+            captureImage.Image = null;
         }
         // Action functions [END]
 
@@ -433,18 +469,17 @@ namespace DpsCamera {
             countLabel.Text = this.workCount.ToString();
         }
         private string makeImagePath(String name) {
-            string yearString = DateTime.Now.ToString("yyyy");
-            string monthDayString = DateTime.Now.ToString("MM-dd");
+            string dateString = DateTime.Now.ToString("yyyy-MM-dd");
             
-            string yearDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + yearString;
-            DirectoryInfo yearDir = new DirectoryInfo(yearDirPath);
+            string dateDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + dateString;
+            DirectoryInfo dateDir = new DirectoryInfo(dateDirPath);
 
-            if (!yearDir.Exists) {
-                yearDir.Create();
+            if (!dateDir.Exists) {
+                dateDir.Create();
             }
 
             if (ParseManager.isNoRead(name)) {
-                string noReadPath = yearDirPath + "\\" + monthDayString + "_NG";
+                string noReadPath = dateDir + "_NG";
                 DirectoryInfo noReadDir = new DirectoryInfo(noReadPath);
 
                 if (!noReadDir.Exists) {
@@ -453,14 +488,7 @@ namespace DpsCamera {
 
                 return noReadPath + "\\NG_" + DateTime.Now.ToString("hh_mm_ss") + ".jpg";
             } else {
-                string normalPath = yearDirPath + "\\" + monthDayString;
-                DirectoryInfo normalDir = new DirectoryInfo(normalPath);
-
-                if (!normalDir.Exists) {
-                    normalDir.Create();
-                }
-
-                return normalPath + "\\" + name + ".jpg";
+                return dateDirPath + "\\" + name + ".jpg";
             }
         }
         private bool RemoveCustomPixelFormats(MyCamera.MvGvspPixelType enPixelFormat) {

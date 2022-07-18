@@ -601,6 +601,7 @@
             this.Controls.Add(this.label8);
             this.Name = "MainForm";
             this.Text = " ";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.formClosing);
             ((System.ComponentModel.ISupportInitialize)(this.captureImage)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

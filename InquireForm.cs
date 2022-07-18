@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -16,17 +17,21 @@ namespace DpsCamera {
         private DateTime selectedDate = DateTime.Now;
         private string storeCode = "";
 
+        private string selectedFilePath = "";
+
         private List<String> files = new List<String>();
 
         public InquireForm() {
             InitializeComponent();
 
-            this.MinimumSize = new System.Drawing.Size(900, 500);
+            this.MinimumSize = new System.Drawing.Size(1200, 800);
             this.Text = "조회하기";
 
+            openImageButton.Enabled = false;
             this.inqureButton.Click += inqureButtonClicked;
-        }
 
+            this.WindowState = FormWindowState.Maximized;
+        }
         public void inqureButtonClicked(object sender, EventArgs e) {
             files.Clear();
             files = makeSearchPath(false);
@@ -36,6 +41,8 @@ namespace DpsCamera {
                 MessageBox.Show("조회된 데이터가 없습니다.");
                 resultGridView.Rows.Clear();
                 resultImage.Image = null;
+                selectedFilePath = "";
+                openImageButton.Enabled = true;
             } else {
                 if (storeCode != "") {
                     List<String> newFiles = new List<String>();
@@ -52,6 +59,8 @@ namespace DpsCamera {
 
                 if (files.Count > 0) {
                     resultImage.Load(@files[0]);
+                    selectedFilePath = files[0];
+                    openImageButton.Enabled = true;
 
                     foreach (string file in files) {
                         string[] pa = file.Split('\\');
@@ -77,6 +86,8 @@ namespace DpsCamera {
                     }
                 } else {
                     resultImage.Image = null;
+                    selectedFilePath = "";
+                    openImageButton.Enabled = false;
                     resultGridView.Rows.Clear();
                     MessageBox.Show("조회된 데이터가 없습니다.");
                 }
@@ -95,9 +106,13 @@ namespace DpsCamera {
                 MessageBox.Show("조회된 데이터가 없습니다.");
                 resultGridView.Rows.Clear();
                 resultImage.Image = null;
+                selectedFilePath = "";
+                openImageButton.Enabled = false;
             } else {
                 if (files.Count > 0) {
                     resultImage.Load(@files[0]);
+                    selectedFilePath = files[0];
+                    openImageButton.Enabled = true;
 
                     foreach (string file in files) {
                         string[] pa = file.Split('\\');
@@ -123,6 +138,8 @@ namespace DpsCamera {
                     }
                 } else {
                     resultImage.Image = null;
+                    selectedFilePath = "";
+                    openImageButton.Enabled = false;
                     resultGridView.Rows.Clear();
                     MessageBox.Show("조회된 데이터가 없습니다.");
                 }
@@ -130,13 +147,12 @@ namespace DpsCamera {
         }
 
         private List<String> makeSearchPath(bool isNoRead) {
-            string yearString = selectedDate.ToString("yyyy");
-            string monthDayString = selectedDate.ToString("MM-dd");
+            string dateString = selectedDate.ToString("yyyy-MM-dd");
 
-            string yearDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + yearString;
+            string dateDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + dateString;
 
             if (isNoRead) {
-                string noReadPath = yearDirPath + "\\" + monthDayString + "_NG";
+                string noReadPath = dateDirPath + "_NG";
                 List<String> result = new List<String>();
 
                 try {
@@ -151,11 +167,10 @@ namespace DpsCamera {
                     return result;
                 }
             } else {
-                string normalPath = yearDirPath + "\\" + monthDayString;
                 List<String> result = new List<String>();
 
                 try {
-                    foreach (string f in Directory.GetFiles(normalPath, $"*.*")) {
+                    foreach (string f in Directory.GetFiles(dateDirPath, $"*.*")) {
                         result.Add(f);
                     }
 
@@ -181,6 +196,13 @@ namespace DpsCamera {
             int selectedIndex = resultGridView.CurrentCell.RowIndex;
 
             resultImage.Load(@files[selectedIndex]);
+            selectedFilePath = files[selectedIndex];
+            openImageButton.Enabled = true;
+        }
+        private void openImageButton_Click(object sender, EventArgs e) {
+            if (selectedFilePath != "") {
+                Process.Start(selectedFilePath);
+            }
         }
     }
 }
