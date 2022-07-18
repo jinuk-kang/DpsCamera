@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace DpsCamera {
     public partial class InquireForm : Form {
-        private String LOCAL_USER_DIR_NAME = "Jin";
+        private String LOCAL_USER_DIR_NAME = "YEIN";
 
         private DateTime selectedDate = DateTime.Now;
         private string storeCode = "";
@@ -21,6 +21,7 @@ namespace DpsCamera {
         public InquireForm() {
             InitializeComponent();
 
+            this.MinimumSize = new System.Drawing.Size(900, 500);
             this.Text = "조회하기";
 
             this.inqureButton.Click += inqureButtonClicked;

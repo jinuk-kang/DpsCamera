@@ -64,7 +64,7 @@ namespace DpsCamera {
 
             this.MinimumSize = new System.Drawing.Size(1000, 658);
 
-            this.Text = "Barcode capture";
+            this.Text = "Barcode Image Scanner";
 
             timer1.Interval = 1000;
             countLabel.Text = "0";
@@ -214,11 +214,15 @@ namespace DpsCamera {
             captureImage.Image = null;
         }
         private void inquireButton_Click(object sender, EventArgs e) {
+            foreach (Form frm in Application.OpenForms) {
+                if (frm.Name == "InquireForm") {
+                    frm.Activate();
+                    return;
+                }
+            }
+
             InquireForm inquireForm = new InquireForm();
             inquireForm.Show();
-        }
-        private void saveImageButton_Click(object sender, EventArgs e) {
-            saveJpg("TEST"); // TODO
         }
         private void goTime(object sender, EventArgs e) {
             progressTime++;
