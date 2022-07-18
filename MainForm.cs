@@ -64,6 +64,8 @@ namespace DpsCamera {
 
             this.MinimumSize = new System.Drawing.Size(1000, 658);
 
+            this.Text = "Barcode capture";
+
             timer1.Interval = 1000;
             countLabel.Text = "0";
             progressTimeLabel.Text = "00:00:00";
@@ -82,7 +84,6 @@ namespace DpsCamera {
             this.isWorking = isWorking;
             startButton.Enabled = !isWorking;
             endButton.Enabled = isWorking;
-            saveImageButton.Enabled = isWorking;
 
             if (isWorking) {
                 timer1.Start();
