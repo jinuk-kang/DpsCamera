@@ -29,6 +29,7 @@ namespace DpsCamera {
 
         private static String response = String.Empty;
 
+        private int START_OFFSET = 2000; // milliseconds
         private int PHOTO_DELAY_TIME = 1000; // milliseconds
         private String LOCAL_USER_DIR_NAME = "YEIN";
 
@@ -83,6 +84,7 @@ namespace DpsCamera {
             
             Control.CheckForIllegalCrossThreadCalls = false;
 
+            Thread.Sleep(START_OFFSET);
             start();
         }
         private void clearOldData() {
@@ -332,14 +334,14 @@ namespace DpsCamera {
             }
 
             if (cameraList.Count == 0) {
-                MessageBox.Show("CameraList is empty");
+                //MessageBox.Show("CameraList is empty");                
             } else {
                 // MessageBox.Show(cameraList[0]);
             }
         }
         private void connectCamera() {
             if (m_stDeviceList.nDeviceNum == 0 || cameraList.Count == 0) {
-                MessageBox.Show("No device, please select");
+                //MessageBox.Show("No device, please select");
                 return;
             }
 
@@ -362,7 +364,7 @@ namespace DpsCamera {
             nRet = m_MyCamera.MV_CC_OpenDevice_NET();
             if (MyCamera.MV_OK != nRet) {
                 m_MyCamera.MV_CC_DestroyDevice_NET();
-                MessageBox.Show("Device open fail!\n" + nRet);
+                //MessageBox.Show("Device open fail!\n" + nRet);
                 return;
             }
 
@@ -372,10 +374,10 @@ namespace DpsCamera {
                 if (nPacketSize > 0) {
                     nRet = m_MyCamera.MV_CC_SetIntValue_NET("GevSCPSPacketSize", (uint)nPacketSize);
                     if (nRet != MyCamera.MV_OK) {
-                        MessageBox.Show("Set Packet Size failed!\n" + nRet);
+                        //MessageBox.Show("Set Packet Size failed!\n" + nRet);
                     }
                 } else {
-                    MessageBox.Show("Get Packet Size failed!\n" + nPacketSize);
+                    //MessageBox.Show("Get Packet Size failed!\n" + nPacketSize);
                 }
             }
 
@@ -414,7 +416,8 @@ namespace DpsCamera {
             if (MyCamera.MV_OK != nRet) {
                 m_bGrabbing = false;
                 m_hReceiveThread.Join();
-                MessageBox.Show("Start Grabbing Fail!\n" + nRet);
+                //MessageBox.Show("Start Grabbing Fail!\n" + nRet);
+                MessageBox.Show("카메라 연결이 끊어졌습니다.\n프로그램을 재실행해주세요.");
                 return;
             }
         }
@@ -431,19 +434,19 @@ namespace DpsCamera {
             // Stop Grabbing
             int nRet = m_MyCamera.MV_CC_StopGrabbing_NET();
             if (nRet != MyCamera.MV_OK) {
-                MessageBox.Show("Stop Grabbing Fail!\n" + nRet);
+                //MessageBox.Show("Stop Grabbing Fail!\n" + nRet);
             }
         }
         private void saveJpg(String name) {
             String imageName = makeImagePath(name);
 
             if (false == m_bGrabbing) {
-                MessageBox.Show("Not Start Grabbing");
+                //MessageBox.Show("Not Start Grabbing");
                 return;
             }
 
             if (RemoveCustomPixelFormats(m_stFrameInfo.enPixelType)) {
-                MessageBox.Show("Not Support!");
+               // MessageBox.Show("Not Support!");
                 return;
             }
 
