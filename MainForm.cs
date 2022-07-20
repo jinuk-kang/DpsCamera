@@ -55,6 +55,7 @@ namespace DpsCamera {
 
         public MainForm() {
             InitializeComponent();
+            this.WindowState = FormWindowState.Maximized;
 
             ipAddress = IPAddress.Parse(BCR_IP);
             remoteEP = new IPEndPoint(ipAddress, BCR_PORT);
@@ -81,6 +82,8 @@ namespace DpsCamera {
             setWorkStatus(false);
             
             Control.CheckForIllegalCrossThreadCalls = false;
+
+            start();
         }
         private void clearOldData() {
             string dirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image";
@@ -145,7 +148,14 @@ namespace DpsCamera {
 
             saveJpg(barcode);
         }
+        private void start() {
+            setWorkStatus(true);
+            acquireCameraList();
+            connectCamera();
+            startGrab();
 
+            Receive(client);
+        }
         // BCR functions [START]
         private void ConnectCallback(IAsyncResult ar) {
             try {
@@ -215,14 +225,9 @@ namespace DpsCamera {
 
         // Action functions [START]
         private void startButton_Click(object sender, EventArgs e) {
-            setWorkStatus(true);
-            acquireCameraList();
-            connectCamera();
-            startGrab();
+            start();
 
-            Receive(client);
-
-            Console.WriteLine("Response received : {0}", response);
+            //Console.WriteLine("Response received : {0}", response);
         }
         private void endButton_Click(object sender, EventArgs e) {
             setWorkStatus(false);

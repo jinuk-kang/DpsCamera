@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace DpsCamera {
     public partial class InquireForm : Form {
-        private String LOCAL_USER_DIR_NAME = "Jin";
+        private String LOCAL_USER_DIR_NAME = "YEIN";
 
         private bool isAllDay = false;
         private DateTime selectedDate = DateTime.Now;
@@ -244,6 +244,10 @@ namespace DpsCamera {
 
                 for (int i=0; i<sList.Length-1; i++) {
                     dirPath += sList[i];
+
+                    if (i != sList.Length-2) {
+                        dirPath += "\\";
+                    }
                 }
 
                 Process.Start(dirPath);
