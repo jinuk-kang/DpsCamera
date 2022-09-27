@@ -17,6 +17,8 @@ using System.Diagnostics;
 
 namespace DpsCamera {
     public partial class MainForm : Form {
+        private List<BarcodeInfo> barcodeList = new List<BarcodeInfo>();
+
         private const int BCR_PORT = 2112;
         private const string BCR_IP = "192.168.0.1";
         private IPAddress ipAddress;
@@ -30,6 +32,7 @@ namespace DpsCamera {
         private static String response = String.Empty;
 
         private int START_OFFSET = 2000; // milliseconds
+
         private int PHOTO_DELAY_TIME = 1000; // milliseconds
         private String LOCAL_USER_DIR_NAME = "YEIN";
 
@@ -120,35 +123,46 @@ namespace DpsCamera {
             }
         }
         private void saveAndShowData(String barcode) {
-            if (ParseManager.isNoRead(barcode)) {
-                barcodeLabel.Text = "NG";
-                roundLabel.Text = "";
-                storeCodeLabel.Text = "";
-                boxOrderLabel.Text = "";
-                divergenceLabel.Text = "";
+            try {
+                BarcodeInfo barcodeInfo;
 
-                dataGridView.Rows.Add(
-                    DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"),
-                    "NG", "", "", "", "");
-            } else {
-                barcodeLabel.Text = barcode;
-                roundLabel.Text = ParseManager.parseRound(barcode);
-                storeCodeLabel.Text = ParseManager.parseStoreCode(barcode);
-                boxOrderLabel.Text = ParseManager.parseBoxOrder(barcode);
-                divergenceLabel.Text = ParseManager.parseDivergence(barcode);
+                if (ParseManager.isNoRead(barcode)) {
+                    barcodeInfo = new BarcodeInfo(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"), "NG", "", "", "", "");
+                } else {
+                    barcodeInfo = new BarcodeInfo(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"), barcode, ParseManager.parseRound(barcode), ParseManager.parseStoreCode(barcode), ParseManager.parseBoxOrder(barcode), ParseManager.parseDivergence(barcode));
+                }
 
+                barcodeLabel.Text = barcodeInfo.barcode;
+                roundLabel.Text = barcodeInfo.round;
+                storeCodeLabel.Text = barcodeInfo.storeCode;
+                boxOrderLabel.Text = barcodeInfo.boxOrder;
+                divergenceLabel.Text = barcodeInfo.divergence;
+
+                barcodeList.Insert(0, barcodeInfo);
+
+                if (barcodeList.Count > 5) {
+                    barcodeList.RemoveAt(barcodeList.Count - 1);
+                }
+
+                refreshGridView();
+
+                Thread.Sleep(PHOTO_DELAY_TIME);
+
+                saveJpg(barcode);
+            } catch (Exception e) {  }
+        }
+        private void refreshGridView() {
+            dataGridView.Rows.Clear();
+
+            for (int i=0; i<barcodeList.Count; i++) {
                 dataGridView.Rows.Add(
-                    DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"),
-                    barcode, 
-                    ParseManager.parseRound(barcode),
-                    ParseManager.parseStoreCode(barcode),
-                    ParseManager.parseBoxOrder(barcode),
-                    ParseManager.parseDivergence(barcode));
+                    barcodeList[i].dateString,
+                    barcodeList[i].barcode,
+                    barcodeList[i].round,
+                    barcodeList[i].storeCode,
+                    barcodeList[i].boxOrder,
+                    barcodeList[i].divergence);
             }
-
-            Thread.Sleep(PHOTO_DELAY_TIME);
-
-            saveJpg(barcode);
         }
         private void start() {
             setWorkStatus(true);
@@ -157,6 +171,8 @@ namespace DpsCamera {
             startGrab();
 
             Receive(client);
+
+            progressTimeLabel.ForeColor = Color.Red;
         }
         // BCR functions [START]
         private void ConnectCallback(IAsyncResult ar) {
@@ -236,6 +252,8 @@ namespace DpsCamera {
             stopGrab();
             disconnectCamera();
 
+            progressTimeLabel.ForeColor = Color.Black;
+
             barcodeLabel.Text = "";
             roundLabel.Text = "";
             storeCodeLabel.Text = "";
@@ -244,15 +262,17 @@ namespace DpsCamera {
             captureImage.Image = null;
         }
         private void inquireButton_Click(object sender, EventArgs e) {
-            foreach (Form frm in Application.OpenForms) {
-                if (frm.Name == "InquireForm") {
-                    frm.Activate();
-                    return;
+            try {
+                foreach (Form frm in Application.OpenForms) {
+                    if (frm.Name == "InquireForm") {
+                        frm.Activate();
+                        return;
+                    }
                 }
-            }
 
-            InquireForm inquireForm = new InquireForm();
-            inquireForm.Show();
+                InquireForm inquireForm = new InquireForm();
+                inquireForm.Show();
+            } catch (Exception error) { }
         }
         private void goTime(object sender, EventArgs e) {
             progressTime++;
@@ -438,128 +458,135 @@ namespace DpsCamera {
             }
         }
         private void saveJpg(String name) {
-            String imageName = makeImagePath(name);
+            try {
+                String imageName = makeImagePath(name);
 
-            if (false == m_bGrabbing) {
-                //MessageBox.Show("Not Start Grabbing");
-                return;
-            }
-
-            if (RemoveCustomPixelFormats(m_stFrameInfo.enPixelType)) {
-               // MessageBox.Show("Not Support!");
-                return;
-            }
-
-            MyCamera.MV_SAVE_IMG_TO_FILE_PARAM stSaveFileParam = new MyCamera.MV_SAVE_IMG_TO_FILE_PARAM();
-
-            lock (BufForDriverLock) {
-                if (m_stFrameInfo.nFrameLen == 0) {
-                    //MessageBox.Show("Save Jpeg Fail!");
+                if (false == m_bGrabbing) {
+                    //MessageBox.Show("Not Start Grabbing");
                     return;
                 }
-                stSaveFileParam.enImageType = MyCamera.MV_SAVE_IAMGE_TYPE.MV_Image_Jpeg;
-                stSaveFileParam.enPixelType = m_stFrameInfo.enPixelType;
-                stSaveFileParam.pData = m_BufForDriver;
-                stSaveFileParam.nDataLen = m_stFrameInfo.nFrameLen;
-                stSaveFileParam.nHeight = m_stFrameInfo.nHeight;
-                stSaveFileParam.nWidth = m_stFrameInfo.nWidth;
-                stSaveFileParam.nQuality = 80;
-                stSaveFileParam.iMethodValue = 2;
-                stSaveFileParam.pImagePath = imageName;
-                
-                int nRet = m_MyCamera.MV_CC_SaveImageToFile_NET(ref stSaveFileParam);
-                if (MyCamera.MV_OK != nRet) {
-                    //MessageBox.Show("Save Jpeg Fail!\n" + nRet);
-                    // TODO
+
+                if (RemoveCustomPixelFormats(m_stFrameInfo.enPixelType)) {
+                    // MessageBox.Show("Not Support!");
                     return;
                 }
-            }
 
-            captureImage.Load(@imageName);
+                MyCamera.MV_SAVE_IMG_TO_FILE_PARAM stSaveFileParam = new MyCamera.MV_SAVE_IMG_TO_FILE_PARAM();
 
-            // MessageBox.Show("Save Succeed!");
-            this.workCount++;
-            countLabel.Text = this.workCount.ToString();
+                lock (BufForDriverLock) {
+                    if (m_stFrameInfo.nFrameLen == 0) {
+                        //MessageBox.Show("Save Jpeg Fail!");
+                        return;
+                    }
+                    stSaveFileParam.enImageType = MyCamera.MV_SAVE_IAMGE_TYPE.MV_Image_Jpeg;
+                    stSaveFileParam.enPixelType = m_stFrameInfo.enPixelType;
+                    stSaveFileParam.pData = m_BufForDriver;
+                    stSaveFileParam.nDataLen = m_stFrameInfo.nFrameLen;
+                    stSaveFileParam.nHeight = m_stFrameInfo.nHeight;
+                    stSaveFileParam.nWidth = m_stFrameInfo.nWidth;
+                    stSaveFileParam.nQuality = 80;
+                    stSaveFileParam.iMethodValue = 2;
+                    stSaveFileParam.pImagePath = imageName;
+
+                    int nRet = m_MyCamera.MV_CC_SaveImageToFile_NET(ref stSaveFileParam);
+                    if (MyCamera.MV_OK != nRet) {
+                        //MessageBox.Show("Save Jpeg Fail!\n" + nRet);
+                        // TODO
+                        return;
+                    }
+                }
+
+                captureImage.Load(@imageName);
+
+                this.workCount++;
+                countLabel.Text = this.workCount.ToString();
+            } catch (Exception e) { }
         }
         private string makeImagePath(String name) {
             string dateString = DateTime.Now.ToString("yyyy-MM-dd");
-            
             string dateDirPath = "C:\\Users\\" + LOCAL_USER_DIR_NAME + "\\Desktop\\Barcode_Image\\" + dateString;
-            DirectoryInfo dateDir = new DirectoryInfo(dateDirPath);
 
-            if (!dateDir.Exists) {
-                dateDir.Create();
-            }
+            try {    
+                DirectoryInfo dateDir = new DirectoryInfo(dateDirPath);
 
-            if (ParseManager.isNoRead(name)) {
-                string noReadPath = dateDir + "_NG";
-                DirectoryInfo noReadDir = new DirectoryInfo(noReadPath);
-
-                if (!noReadDir.Exists) {
-                    noReadDir.Create();
+                if (!dateDir.Exists) {
+                    dateDir.Create();
                 }
 
-                return noReadPath + "\\NG_" + DateTime.Now.ToString("hh_mm_ss") + ".jpg";
-            } else {
-                return dateDirPath + "\\" + name + ".jpg";
+                if (ParseManager.isNoRead(name)) {
+                    string noReadPath = dateDir + "_NG";
+                    DirectoryInfo noReadDir = new DirectoryInfo(noReadPath);
+
+                    if (!noReadDir.Exists) {
+                        noReadDir.Create();
+                    }
+
+                    return noReadPath + "\\NG_" + DateTime.Now.ToString("hh_mm_ss") + ".jpg";
+                } else {
+                    return dateDirPath + "\\" + name + ".jpg";
+                }
+            } catch (Exception e) {
+                return dateDirPath;
             }
         }
         private bool RemoveCustomPixelFormats(MyCamera.MvGvspPixelType enPixelFormat) {
-            Int32 nResult = ((int)enPixelFormat) & (unchecked((Int32)0x80000000));
-            if (0x80000000 == nResult) {
-                return true;
-            } else {
+            try {
+                Int32 nResult = ((int)enPixelFormat) & (unchecked((Int32)0x80000000));
+                if (0x80000000 == nResult) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (Exception e) {
                 return false;
             }
         }
         public void ReceiveThreadProcess() {
-            MyCamera.MV_FRAME_OUT stFrameInfo = new MyCamera.MV_FRAME_OUT();
-            MyCamera.MV_DISPLAY_FRAME_INFO stDisplayInfo = new MyCamera.MV_DISPLAY_FRAME_INFO();
-            int nRet = MyCamera.MV_OK;
+            try {
+                MyCamera.MV_FRAME_OUT stFrameInfo = new MyCamera.MV_FRAME_OUT();
+                MyCamera.MV_DISPLAY_FRAME_INFO stDisplayInfo = new MyCamera.MV_DISPLAY_FRAME_INFO();
+                int nRet = MyCamera.MV_OK;
 
-            while (m_bGrabbing) {
-                nRet = m_MyCamera.MV_CC_GetImageBuffer_NET(ref stFrameInfo, 1000);
-                if (nRet == MyCamera.MV_OK) {
-                    lock (BufForDriverLock) {
-                        if (m_BufForDriver == IntPtr.Zero || stFrameInfo.stFrameInfo.nFrameLen > m_nBufSizeForDriver) {
-                            if (m_BufForDriver != IntPtr.Zero) {
-                                Marshal.Release(m_BufForDriver);
-                                m_BufForDriver = IntPtr.Zero;
+                while (m_bGrabbing) {
+                    nRet = m_MyCamera.MV_CC_GetImageBuffer_NET(ref stFrameInfo, 1000);
+                    if (nRet == MyCamera.MV_OK) {
+                        lock (BufForDriverLock) {
+                            if (m_BufForDriver == IntPtr.Zero || stFrameInfo.stFrameInfo.nFrameLen > m_nBufSizeForDriver) {
+                                if (m_BufForDriver != IntPtr.Zero) {
+                                    Marshal.Release(m_BufForDriver);
+                                    m_BufForDriver = IntPtr.Zero;
+                                }
+
+                                m_BufForDriver = Marshal.AllocHGlobal((Int32)stFrameInfo.stFrameInfo.nFrameLen);
+                                if (m_BufForDriver == IntPtr.Zero) {
+                                    return;
+                                }
+                                m_nBufSizeForDriver = stFrameInfo.stFrameInfo.nFrameLen;
                             }
 
-                            m_BufForDriver = Marshal.AllocHGlobal((Int32)stFrameInfo.stFrameInfo.nFrameLen);
-                            if (m_BufForDriver == IntPtr.Zero) {
-                                return;
-                            }
-                            m_nBufSizeForDriver = stFrameInfo.stFrameInfo.nFrameLen;
+                            m_stFrameInfo = stFrameInfo.stFrameInfo;
+                            CopyMemory(m_BufForDriver, stFrameInfo.pBufAddr, stFrameInfo.stFrameInfo.nFrameLen);
                         }
 
-                        m_stFrameInfo = stFrameInfo.stFrameInfo;
-                        CopyMemory(m_BufForDriver, stFrameInfo.pBufAddr, stFrameInfo.stFrameInfo.nFrameLen);
-                    }
+                        if (RemoveCustomPixelFormats(stFrameInfo.stFrameInfo.enPixelType)) {
+                            m_MyCamera.MV_CC_FreeImageBuffer_NET(ref stFrameInfo);
+                            continue;
+                        }
 
-                    if (RemoveCustomPixelFormats(stFrameInfo.stFrameInfo.enPixelType)) {
+                        //stDisplayInfo.hWnd = captureImage.Handle;
+                        stDisplayInfo.pData = stFrameInfo.pBufAddr;
+                        stDisplayInfo.nDataLen = stFrameInfo.stFrameInfo.nFrameLen;
+                        stDisplayInfo.nWidth = stFrameInfo.stFrameInfo.nWidth;
+                        stDisplayInfo.nHeight = stFrameInfo.stFrameInfo.nHeight;
+                        stDisplayInfo.enPixelType = stFrameInfo.stFrameInfo.enPixelType;
+                        m_MyCamera.MV_CC_DisplayOneFrame_NET(ref stDisplayInfo);
+
                         m_MyCamera.MV_CC_FreeImageBuffer_NET(ref stFrameInfo);
-                        continue;
-                    }
-
-                    //stDisplayInfo.hWnd = productImage.Handle;
-                    stDisplayInfo.pData = stFrameInfo.pBufAddr;
-                    stDisplayInfo.nDataLen = stFrameInfo.stFrameInfo.nFrameLen;
-                    stDisplayInfo.nWidth = stFrameInfo.stFrameInfo.nWidth;
-                    stDisplayInfo.nHeight = stFrameInfo.stFrameInfo.nHeight;
-                    stDisplayInfo.enPixelType = stFrameInfo.stFrameInfo.enPixelType;
-                    m_MyCamera.MV_CC_DisplayOneFrame_NET(ref stDisplayInfo);
-
-                    m_MyCamera.MV_CC_FreeImageBuffer_NET(ref stFrameInfo);
-                } else {
-                    /*
-                    if (bnTriggerMode.Checked) {
+                    } else {
                         Thread.Sleep(5);
                     }
-                    */
                 }
-            }
+            } catch (Exception e) {  }
         }
         // Camera functions [END]
     }

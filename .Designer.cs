@@ -45,9 +45,9 @@
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.openImageButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
             this.openDirButton = new System.Windows.Forms.Button();
+            this.openImageButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.resultImage)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
@@ -291,19 +291,6 @@
             this.tableLayoutPanel5.Size = new System.Drawing.Size(739, 732);
             this.tableLayoutPanel5.TabIndex = 20;
             // 
-            // openImageButton
-            // 
-            this.openImageButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.openImageButton.Font = new System.Drawing.Font("맑은 고딕", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.openImageButton.Location = new System.Drawing.Point(3, 4);
-            this.openImageButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.openImageButton.Name = "openImageButton";
-            this.openImageButton.Size = new System.Drawing.Size(360, 98);
-            this.openImageButton.TabIndex = 17;
-            this.openImageButton.Text = "사진 열기";
-            this.openImageButton.UseVisualStyleBackColor = true;
-            this.openImageButton.Click += new System.EventHandler(this.openImageButton_Click);
-            // 
             // tableLayoutPanel8
             // 
             this.tableLayoutPanel8.ColumnCount = 2;
@@ -331,6 +318,19 @@
             this.openDirButton.Text = "폴더 열기";
             this.openDirButton.UseVisualStyleBackColor = true;
             this.openDirButton.Click += new System.EventHandler(this.openDirButton_Click);
+            // 
+            // openImageButton
+            // 
+            this.openImageButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.openImageButton.Font = new System.Drawing.Font("맑은 고딕", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.openImageButton.Location = new System.Drawing.Point(3, 4);
+            this.openImageButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.openImageButton.Name = "openImageButton";
+            this.openImageButton.Size = new System.Drawing.Size(360, 98);
+            this.openImageButton.TabIndex = 17;
+            this.openImageButton.Text = "사진 열기";
+            this.openImageButton.UseVisualStyleBackColor = true;
+            this.openImageButton.Click += new System.EventHandler(this.openImageButton_Click);
             // 
             // InquireForm
             // 
